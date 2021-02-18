@@ -2,13 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Nav from './components/Nav';
-import TopStories from './components/TopStories';
 import styled from 'styled-components';
 import { ThemeProvider } from './contexts/theme';
-import User from './components/User';
 import querystring from 'query-string';
-import Post from './components/Post';
 import GlobalStyle from './components/GlobalStyle';
+import Loading from './components/Loading';
+
+const TopStories = React.lazy(() => import('./components/TopStories'));
+const User = React.lazy(() => import('./components/User'));
+const Post = React.lazy(() => import('./components/Post'));
 
 const Main = styled.div`
   height: 100%;
@@ -39,31 +41,33 @@ class App extends React.Component {
           <Main>
             <BrowserRouter>
               <Nav />
-              <Switch>
-                <Route
-                  exact
-                  path="/"
-                  render={() => <TopStories feed="topstories" />}
-                />
-                <Route
-                  path="/new"
-                  render={() => <TopStories feed="newstories" />}
-                />
-                <Route
-                  path="/user"
-                  render={({ location }) => {
-                    const { id } = querystring.parse(location.search);
-                    return <User username={id} />;
-                  }}
-                />
-                <Route
-                  path="/post"
-                  render={({ location }) => {
-                    const { id } = querystring.parse(location.search);
-                    return <Post id={id} />;
-                  }}
-                />
-              </Switch>
+              <React.Suspense fallback={<Loading />}>
+                <Switch>
+                  <Route
+                    exact
+                    path="/"
+                    render={() => <TopStories feed="topstories" />}
+                  />
+                  <Route
+                    path="/new"
+                    render={() => <TopStories feed="newstories" />}
+                  />
+                  <Route
+                    path="/user"
+                    render={({ location }) => {
+                      const { id } = querystring.parse(location.search);
+                      return <User username={id} />;
+                    }}
+                  />
+                  <Route
+                    path="/post"
+                    render={({ location }) => {
+                      const { id } = querystring.parse(location.search);
+                      return <Post id={id} />;
+                    }}
+                  />
+                </Switch>
+              </React.Suspense>
             </BrowserRouter>
           </Main>
         </ThemeProvider>
