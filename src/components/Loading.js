@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { ThemeConsumer } from '../contexts/theme';
 import colors from '../styles/colors';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 const LoadingContent = styled.p`
   color: ${({ darkMode }) =>
@@ -15,43 +15,30 @@ const LoadingContent = styled.p`
   text-align: center;
 `;
 
-export default class Loading extends React.Component {
-  static propTypes = {
-    text: PropTypes.string,
-    speed: PropTypes.number,
-  };
+function useLoadingText(initialValue, speed) {
+  const [text, setText] = useState(initialValue);
 
-  static defaultProps = {
-    text: 'Loading',
-    speed: 300,
-  };
-
-  state = {
-    content: this.props.text,
-  };
-
-  componentDidMount() {
-    const { speed, text } = this.props;
-
-    this.interval = window.setInterval(() => {
-      this.state.content === `${text}...`
-        ? this.setState({ content: text })
-        : this.setState(({ content }) => ({ content: content + '.' }));
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setText((text) =>
+        text === `${initialValue}...` ? initialValue : `${text}.`,
+      );
     }, speed);
-  }
 
-  componentWillUnmount() {
-    window.clearInterval(this.interval);
-  }
+    return () => window.clearInterval(interval);
+  }, [initialValue, speed]);
 
-  render() {
-    const { content } = this.state;
-    return (
-      <ThemeConsumer>
-        {({ darkMode }) => (
-          <LoadingContent darkMode={darkMode}>{content}</LoadingContent>
-        )}
-      </ThemeConsumer>
-    );
-  }
+  return text;
 }
+
+export default function Loading({ text = 'Loading', speed = 300 }) {
+  const content = useLoadingText(text, speed);
+  const darkMode = useDarkMode();
+
+  return <LoadingContent darkMode={darkMode}>{content}</LoadingContent>;
+}
+
+Loading.propTypes = {
+  text: PropTypes.string,
+  speed: PropTypes.number,
+};

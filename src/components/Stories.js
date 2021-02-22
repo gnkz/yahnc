@@ -1,86 +1,59 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getStories } from '../utils/hn';
 import styled from 'styled-components';
-import Loading from './Loading';
 import StoryInfo from './StoryInfo';
 import { StoryTitle } from './StoryTitle';
+import { useItem } from '../hooks/useItem';
 
 const StoryListItemContainer = styled.div`
   margin: 20px 0;
 `;
 
-function StoryListItem({ story }) {
+function StoryListItem({ id }) {
+  const { item, loading } = useItem(id);
+
+  if (loading) {
+    return null;
+  }
+
+  const isValid = item && item.type === 'story' && !item.deleted && !item.dead;
+
   return (
-    <StoryListItemContainer>
-      <StoryTitle id={story.id} title={story.title} url={story.url} />
-      <StoryInfo
-        id={story.id}
-        by={story.by}
-        time={story.time}
-        descendants={story.descendants || 0}
-      />
-    </StoryListItemContainer>
+    <>
+      {isValid && (
+        <li>
+          <StoryListItemContainer>
+            <StoryTitle id={item.id} title={item.title} url={item.url} />
+            <StoryInfo
+              id={item.id}
+              by={item.by}
+              time={item.time}
+              descendants={item.descendants || 0}
+            />
+          </StoryListItemContainer>
+        </li>
+      )}
+    </>
   );
 }
 
 StoryListItem.propTypes = {
-  story: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    url: PropTypes.string,
-    time: PropTypes.number.isRequired,
-    descendants: PropTypes.number,
-    by: PropTypes.string.isRequired,
-  }),
+  id: PropTypes.number.isRequired,
 };
 
-export default class Stories extends React.Component {
-  static propTypes = {
-    storiesIds: PropTypes.array.isRequired,
-  };
+export default function Stories({ storiesIds, limit = 30 }) {
+  const storiesToShow = storiesIds.slice(0, limit);
 
-  state = {
-    stories: [],
-    error: null,
-    loading: true,
-  };
-
-  fetchStories = (storiesIds) => {
-    getStories(storiesIds).then((stories) =>
-      this.setState({
-        stories: stories.filter(
-          (story) => story.type === 'story' && !story.deleted,
-        ),
-        error: null,
-        loading: false,
-      }),
-    );
-  };
-
-  componentDidMount() {
-    this.fetchStories(this.props.storiesIds);
-  }
-
-  render() {
-    const { stories, loading } = this.state;
-
-    if (loading) {
-      return <Loading text="Fetching stories" />;
-    }
-
-    return (
-      <ul>
-        {stories.map((story) => {
-          return (
-            story && (
-              <li key={story.id}>
-                <StoryListItem story={story} />
-              </li>
-            )
-          );
-        })}
-      </ul>
-    );
-  }
+  return (
+    <ul>
+      {storiesToShow.map((id) => (
+        <StoryListItem key={id} id={id} />
+      ))}
+    </ul>
+  );
 }
+
+Stories.propTypes = {
+  storiesIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  limit: PropTypes.number,
+};

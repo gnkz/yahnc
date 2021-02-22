@@ -3,7 +3,8 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import colors from '../styles/colors';
 import Button from './Button';
-import { ThemeConsumer } from '../contexts/theme';
+import PropTypes from 'prop-types';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 const NavContainer = styled.nav`
   display: flex;
@@ -31,28 +32,30 @@ const NavContainer = styled.nav`
   }
 `;
 
-export default function Nav() {
+export default function Nav({ toggleDarkMode }) {
+  const darkMode = useDarkMode();
+
   return (
-    <ThemeConsumer>
-      {({ darkMode, toggleDarkMode }) => (
-        <NavContainer darkMode={darkMode}>
-          <ul>
-            <li>
-              <NavLink exact to="/">
-                Top
-              </NavLink>
-            </li>
-            <li>
-              <NavLink exact to="/new">
-                New
-              </NavLink>
-            </li>
-          </ul>
-          <Button size="30px" onClick={toggleDarkMode}>
-            {darkMode ? '💡' : '🔦'}
-          </Button>
-        </NavContainer>
-      )}
-    </ThemeConsumer>
+    <NavContainer darkMode={darkMode}>
+      <ul>
+        <li>
+          <NavLink exact to="/">
+            Top
+          </NavLink>
+        </li>
+        <li>
+          <NavLink exact to="/new">
+            New
+          </NavLink>
+        </li>
+      </ul>
+      <Button size="30px" onClick={toggleDarkMode}>
+        {darkMode ? '💡' : '🔦'}
+      </Button>
+    </NavContainer>
   );
 }
+
+Nav.propTypes = {
+  toggleDarkMode: PropTypes.func.isRequired,
+};

@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Loading from './Loading';
-import { getStories } from '../utils/hn';
 import StoryInfo from './StoryInfo';
-import { ThemeConsumer } from '../contexts/theme';
 import colors from '../styles/colors';
+import { useDarkMode } from '../hooks/useDarkMode';
+import { useItem } from '../hooks/useItem';
 
 const CommentContainer = styled.div`
   background: rgba(128, 128, 128, 0.1411764705882353);
@@ -16,71 +16,49 @@ const CommentContainer = styled.div`
   margin: 10px 0;
 `;
 
-function Comment({ id, by, time, text }) {
+function Comment({ id }) {
+  const { item, loading } = useItem(id);
+  const darkMode = useDarkMode();
+
+  const isValid =
+    item && !item.deleted && !item.dead && item.type === 'comment';
+
+  if (loading) {
+    return (
+      <li>
+        <Loading />
+      </li>
+    );
+  }
+
   return (
-    <ThemeConsumer>
-      {({ darkMode }) => (
-        <CommentContainer darkMode={darkMode}>
-          <StoryInfo id={id} by={by} time={time} />
-          <p dangerouslySetInnerHTML={{ __html: text }}></p>
-        </CommentContainer>
+    <>
+      {isValid && (
+        <li>
+          <CommentContainer darkMode={darkMode}>
+            <StoryInfo id={item.id} by={item.by} time={item.time} />
+            <p dangerouslySetInnerHTML={{ __html: item.text }}></p>
+          </CommentContainer>
+        </li>
       )}
-    </ThemeConsumer>
+    </>
   );
 }
 
 Comment.propTypes = {
   id: PropTypes.number.isRequired,
-  by: PropTypes.string.isRequired,
-  time: PropTypes.number.isRequired,
-  text: PropTypes.string.isRequired,
 };
 
-export default class Comments extends React.Component {
-  static propTypes = {
-    ids: PropTypes.array,
-  };
-
-  state = {
-    comments: [],
-    error: null,
-    loading: true,
-  };
-
-  fetchComments = (ids) => {
-    getStories(ids).then((comments) =>
-      this.setState({ comments, error: null, loading: false }),
-    );
-  };
-
-  componentDidMount() {
-    this.fetchComments(this.props.ids);
-  }
-
-  render() {
-    const { comments, loading } = this.state;
-
-    if (loading) {
-      return <Loading text="Loading comments" />;
-    }
-
-    return (
-      <ul>
-        {comments.map(
-          (comment) =>
-            !comment.deleted &&
-            !comment.dead && (
-              <li key={comment.id}>
-                <Comment
-                  id={comment.id}
-                  by={comment.by}
-                  time={comment.time}
-                  text={comment.text}
-                />
-              </li>
-            ),
-        )}
-      </ul>
-    );
-  }
+export default function Comments({ ids }) {
+  return (
+    <ul>
+      {ids.map((id) => (
+        <Comment key={id} id={id} />
+      ))}
+    </ul>
+  );
 }
+
+Comments.propTypes = {
+  ids: PropTypes.arrayOf(PropTypes.number).isRequired,
+};
