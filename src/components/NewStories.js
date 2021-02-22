@@ -3,8 +3,8 @@ import Stories from './Stories';
 import Loading from './Loading';
 import { useFeed } from '../hooks/useFeed';
 
-export default function TopStories() {
-  const { storiesIds, loading } = useFeed('topstories');
+export default function NewStories() {
+  const { storiesIds, loading } = useFeed('newstories');
 
   if (loading) {
     return <Loading text="Fetching stories" />;

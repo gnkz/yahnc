@@ -1,56 +1,33 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getStories } from '../utils/hn';
 import { StoryTitle } from './StoryTitle';
 import Loading from './Loading';
 import StoryInfo from './StoryInfo';
 import Comments from './Comments';
+import { useItem } from '../hooks/useItem';
 
-export default class Post extends React.Component {
-  static propTypes = {
-    id: PropTypes.string.isRequired,
-  };
+export default function Post({ id }) {
+  id = Number(id);
 
-  state = {
-    story: null,
-    error: null,
-    loading: true,
-  };
+  const { item, loading } = useItem(id);
 
-  fetchStory = (id) => {
-    getStories([id], 1).then((stories) =>
-      this.setState({
-        story: stories[0],
-        error: null,
-        loading: false,
-      }),
-    );
-  };
-
-  componentDidMount() {
-    this.fetchStory(this.props.id);
+  if (loading) {
+    return <Loading text="Loading story" />;
   }
 
-  render() {
-    const { loading, story } = this.state;
+  const { title, url, by, time, descendants, kids } = item;
 
-    if (loading) {
-      return <Loading text="Loading story" />;
-    }
-
-    return (
-      <div>
-        <h1>
-          <StoryTitle id={story.id} title={story.title} url={story.url} />
-        </h1>
-        <StoryInfo
-          id={story.id}
-          by={story.by}
-          time={story.time}
-          descendants={story.descendants}
-        />
-        <Comments ids={story.kids || []} />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <h1>
+        <StoryTitle id={id} title={title} url={url} />
+      </h1>
+      <StoryInfo id={id} by={by} time={time} descendants={descendants} />
+      <Comments ids={kids || []} />
+    </div>
+  );
 }
+
+Post.propTypes = {
+  id: PropTypes.string.isRequired,
+};
