@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import StoryInfo from './StoryInfo';
@@ -42,13 +42,13 @@ StoryListItem.propTypes = {
 };
 
 export default function Stories({ storiesIds, limit = 30 }) {
-  const storiesToShow = storiesIds.splice(0, limit);
+  const storiesToShow = storiesIds.slice(0, limit);
 
   return (
     <ul>
-      {storiesToShow.map((id) => {
-        return <StoryListItem key={id} id={id} />;
-      })}
+      {storiesToShow.map((id) => (
+        <StoryListItem key={id} id={id} />
+      ))}
     </ul>
   );
 }
