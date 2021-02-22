@@ -1,6 +1,7 @@
 # Yet another hacker news clone
 
-This project was created as part of the [React](https://ui.dev/react/) course on
+This project was created as part of the [React](https://ui.dev/react/) and
+[React Hooks](https://ui.dev/react-hooks) courses on
 [ui.dev](https://ui.dev)
 
 ## Installation
