@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Nav from './components/Nav';
@@ -24,6 +24,7 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleDarkMode = () => setDarkMode((darkMode) => !darkMode);
+
   return (
     <>
       <ThemeProvider value={darkMode}>

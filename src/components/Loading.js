@@ -26,7 +26,7 @@ function useLoadingText(initialValue, speed) {
     }, speed);
 
     return () => window.clearInterval(interval);
-  }, [initialValue]);
+  }, [initialValue, speed]);
 
   return text;
 }
